@@ -11,5 +11,6 @@ let package = Package(
         .target(name: "StudioFeatures", dependencies: ["StudioCore", "ProviderKit", "StudioPersistence", "StudioMedia"]),
         .testTarget(name: "StudioCoreTests", dependencies: ["StudioCore"]),
         .testTarget(name: "ProviderKitTests", dependencies: ["ProviderKit"]),
+        .testTarget(name: "StudioMediaTests", dependencies: ["StudioMedia"]),
         .testTarget(name: "StudioPersistenceTests", dependencies: ["StudioPersistence", "ProviderKit"])
     ])
