@@ -78,7 +78,9 @@ final class TimelineTests: XCTestCase {
             let url = URL(fileURLWithPath: evidence).appendingPathComponent("M4-export-frame.png")
             let png = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil)!
             CGImageDestinationAddImage(png, frame, nil); XCTAssertTrue(CGImageDestinationFinalize(png))
-            try FileManager.default.copyItem(at: output, to: URL(fileURLWithPath: evidence).appendingPathComponent("M4-fixture.mp4"))
+            let fixture = URL(fileURLWithPath: evidence).appendingPathComponent("M4-fixture.mp4")
+            try? FileManager.default.removeItem(at: fixture)
+            try FileManager.default.copyItem(at: output, to: fixture)
         }
     }
 }
