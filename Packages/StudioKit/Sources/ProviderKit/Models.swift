@@ -106,6 +106,10 @@ public struct Attempt: Codable, Sendable {
     public let latency: Double
     public let errorClass: ProviderErrorClass?
     public let reason: String
+    public init(modelID: String, date: Date, latency: Double, errorClass: ProviderErrorClass?, reason: String) {
+        self.modelID = modelID; self.date = date; self.latency = latency
+        self.errorClass = errorClass; self.reason = reason
+    }
 }
 public enum Availability: String, Codable, Sendable { case untested, available, rateLimited, quotaExhausted, unavailable, needsKey }
 public struct ModelRuntime: Codable, Sendable {
