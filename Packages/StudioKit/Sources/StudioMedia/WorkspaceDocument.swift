@@ -26,7 +26,7 @@ public struct WorkspaceDocument: Codable, Sendable {
 /// Media stays in an Application Support project directory. SwiftData holds the project ID.
 /// Atomic sidecar snapshots avoid an invented SwiftData schema migration in this milestone.
 public actor WorkspaceFiles {
-    public let directory: URL
+    public nonisolated let directory: URL
     public init(projectID: UUID, base: URL? = nil) throws {
         let root = try base ?? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
         directory = root.appendingPathComponent("AIStudio/Projects/" + projectID.uuidString, isDirectory: true)
