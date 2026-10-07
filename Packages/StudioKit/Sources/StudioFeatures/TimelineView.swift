@@ -3,6 +3,10 @@ import AVKit
 import UniformTypeIdentifiers
 import StudioMedia
 import StudioPersistence
+#if os(iOS)
+import PhotosUI
+import CoreTransferable
+#endif
 
 @MainActor @Observable
 final class TimelineStore {
@@ -67,6 +71,18 @@ final class TimelineStore {
             notice = "Media copied locally. Only import files you may use."
         } catch { notice = "Media could not be imported. Try a supported image or video file." }
     }
+    func importPhoto(_ url: URL) async -> Bool {
+        guard loaded, !busy, let files, document.clips.count < 100 else { return false }
+        busy = true; defer { busy = false }
+        do {
+            let name = try await files.importPhoto(url)
+            history.append(document); future = []
+            document.clips.append(.init(relativePath: name, kind: .image))
+            document.lastExportPath = nil; exportURL = nil; player = nil
+            await save(); notice = "Photo added. Ready to export."
+            return true
+        } catch { notice = "Could not load this photo. For iCloud photos, connect to the internet and retry, or use Add from Files."; return false }
+    }
     func addWorkspaceImageAndVoice() async {
         guard !busy, loaded else { return }
         do {
@@ -104,13 +120,22 @@ struct TimelineView: View {
     @State private var store: TimelineStore
     @State private var importing = false
     @State private var importKind: MediaKind = .image
+    #if os(iOS)
+    @State private var selectedPhotos: [PhotosPickerItem] = []
+    @State private var photoBusy = false
+    #endif
     @Environment(\.scenePhase) private var phase
     init(projectID: UUID) { _store = State(initialValue: TimelineStore(projectID: projectID)) }
     var body: some View {
         List {
             Section("Local timeline") {
                 Text("Imported clips or still-image slideshow, not AI-generated video. Up to 100 clips / 10 minutes. Fit-to-frame adds black bars.").font(.footnote)
-                Button("Add image file") { importKind = .image; importing = true }.disabled(store.busy || !store.loaded)
+                #if os(iOS)
+                PhotosPicker(selection: $selectedPhotos, maxSelectionCount: 20, matching: .images, preferredItemEncoding: .compatible) {
+                    Label("Add photos from library", systemImage: "photo.badge.plus")
+                }.disabled(store.busy || photoBusy || !store.loaded)
+                #endif
+                Button("Add image from Files") { importKind = .image; importing = true }.disabled(store.busy || !store.loaded)
                 Button("Add video file") { importKind = .video; importing = true }.disabled(store.busy || !store.loaded)
                 Button("Add workspace image and voiceover") { Task { await store.addWorkspaceImageAndVoice() } }.disabled(store.busy || !store.loaded)
                 HStack {
@@ -144,6 +169,16 @@ struct TimelineView: View {
             case .failure: store.notice = "Import cancelled or unavailable."
             }
         }
+        #if os(iOS)
+        .onChange(of: selectedPhotos) { _, items in
+            guard !items.isEmpty else { return }
+            photoBusy = true
+            Task {
+                await importSelectedPhotos(items, into: store)
+                selectedPhotos = []; photoBusy = false
+            }
+        }
+        #endif
         .onChange(of: phase) { _, value in if value != .active { store.cancel() } }
         .onDisappear { store.cancel(); Task { await store.save() } }
     }
@@ -183,3 +218,29 @@ struct TimelineView: View {
         })
     }
 }
+
+#if os(iOS)
+/// File transfer avoids loading full-resolution multi-photo selections into RAM.
+struct PickedPhoto: Transferable, Sendable {
+    let url: URL
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(importedContentType: .image) { received in
+            let target = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension(received.file.pathExtension.isEmpty ? "img" : received.file.pathExtension)
+            try FileManager.default.copyItem(at: received.file, to: target)
+            return PickedPhoto(url: target)
+        }
+    }
+}
+@MainActor
+func importSelectedPhotos(_ items: [PhotosPickerItem], into store: TimelineStore) async {
+    var added = 0
+    for item in items {
+        do {
+            guard let photo = try await item.loadTransferable(type: PickedPhoto.self) else { continue }
+            defer { try? FileManager.default.removeItem(at: photo.url) }
+            if await store.importPhoto(photo.url) { added += 1 }
+        } catch { continue }
+    }
+    store.notice = "Added \(added) of \(items.count) photos. " + (added == items.count ? "Tap Export video when ready." : "Some photos failed. Download iCloud originals and retry, or use Add from Files.")
+}
+#endif
