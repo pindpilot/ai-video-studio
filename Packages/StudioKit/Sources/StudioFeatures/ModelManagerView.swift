@@ -92,7 +92,10 @@ public struct ModelManagerView: View {
                     }
                     if !store.notice.isEmpty { Text(store.notice).font(.footnote) }
                 }
-            }.navigationTitle("Model Manager").toolbar { EditButton() }
+            }.navigationTitle("Model Manager")
+            #if os(iOS)
+            .toolbar { EditButton() }
+            #endif
             .sheet(item: $keyModel) { model in KeyEditor(model: model) { store.refreshKeys() } }
         }
     }
