@@ -16,5 +16,5 @@ public struct StudioProject: Identifiable, Codable, Equatable, Sendable {
     }
 }
 public enum StudioBuildStatus {
-    public static let milestone = "M2: persistent project store and idempotent stage-job queue. Live generation not connected yet."
+    public static let milestone = "M3: manual scripts, Cloudflare script/image adapters, local voiceover audio and editable SRT. Device tests pending; video export arrives later."
 }
