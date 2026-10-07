@@ -132,17 +132,39 @@ struct WorkspaceView: View {
     init(project: ProjectSnapshot, database: StudioStore) { _store = State(initialValue: WorkspaceStore(project: project, database: database)) }
     var body: some View {
         Form {
+            scriptSection
+            imageSection
+            voiceSection
+            subtitleSection
+            statusSection
+        }
+        .navigationTitle(store.project.name)
+        .task { await store.load() }
+        .onChange(of: store.document.script) { _, _ in Task { await store.save() } }
+        .onChange(of: store.document.imagePrompt) { _, _ in Task { await store.save() } }
+        .onChange(of: store.document.voiceID) { _, _ in Task { await store.save() } }
+        .onChange(of: store.document.language) { _, _ in store.document.voiceID = ""; Task { await store.save() } }
+        .onChange(of: store.document.subtitleSource) { _, _ in Task { await store.save() } }
+        .onDisappear { store.cancel(); Task { await store.save() } }
+    }
+    private var scriptSection: some View {
             Section("Script - review before continuing") {
                 TextEditor(text: $store.document.script).frame(minHeight: 150).accessibilityLabel("Editable script")
                 Button("Generate script with Cloudflare") { store.generateScript() }.disabled(store.busy || !store.loaded)
                 Text("Idea and language go to Cloudflare. Review facts. Manual scripts work without a key.").font(.footnote)
             }
+    }
+
+    private var imageSection: some View {
             Section("Visual") {
                 TextField("Image prompt", text: $store.document.imagePrompt, axis: .vertical)
                 Button("Generate image with FLUX") { store.generateImage() }.disabled(store.busy || !store.loaded)
                 Text("Prompt goes to Cloudflare. Output uses provider defaults; reframing is a later editing step.").font(.footnote)
                 if let url = store.imageURL { ShareLink("Share saved image", item: url) }
             }
+    }
+
+    private var voiceSection: some View {
             Section("On-device voiceover") {
                 TextField("Voice locale (for example en-US)", text: $store.document.language)
                     .disabled(store.busy)
@@ -159,6 +181,9 @@ struct WorkspaceView: View {
                     ShareLink("Share audio", item: url)
                 }
             }
+    }
+
+    private var subtitleSection: some View {
             Section("Subtitles - editable SRT") {
                 TextField("Audio duration in seconds", value: $store.duration, format: .number)
                 Button("Estimate from script and duration") { store.estimateSubtitles() }.disabled(store.busy || !store.loaded)
@@ -167,20 +192,15 @@ struct WorkspaceView: View {
                 Button("Validate and save SRT") { store.saveSubtitles() }.disabled(store.busy || !store.loaded)
                 if let url = store.subtitleURL { ShareLink("Share SRT", item: url) }
             }
+    }
+
+    private var statusSection: some View {
             Section {
                 if store.busy { ProgressView(); Button("Cancel") { store.cancel() } }
                 if !store.notice.isEmpty { Text(store.notice) }
                 ForEach(Array(store.attempts.enumerated()), id: \.offset) { _, attempt in Text(attempt.modelID + ": " + attempt.reason).font(.footnote) }
                 Text("Video composition, STT alignment and caption styling come later. No paid fallback.").font(.footnote)
             }
-        }
-        .navigationTitle(store.project.name)
-        .task { await store.load() }
-        .onChange(of: store.document.script) { _, _ in Task { await store.save() } }
-        .onChange(of: store.document.imagePrompt) { _, _ in Task { await store.save() } }
-        .onChange(of: store.document.voiceID) { _, _ in Task { await store.save() } }
-        .onChange(of: store.document.language) { _, _ in store.document.voiceID = ""; Task { await store.save() } }
-        .onChange(of: store.document.subtitleSource) { _, _ in Task { await store.save() } }
-        .onDisappear { store.cancel(); Task { await store.save() } }
     }
+
 }
