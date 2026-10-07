@@ -1,4 +1,6 @@
 import Foundation
+import ImageIO
+import UniformTypeIdentifiers
 public enum MediaKind: String, Codable, Sendable { case image, video }
 public enum ExportRatio: String, CaseIterable, Codable, Sendable {
     case portrait = "9:16", landscape = "16:9", square = "1:1"
@@ -70,6 +72,26 @@ public actor TimelineFiles {
     }
     public func save(_ document: TimelineDocument) throws {
         try JSONEncoder().encode(document).write(to: directory.appendingPathComponent("timeline.json"), options: .atomic)
+    }
+    /// Decode HEIC/JPEG/PNG, apply EXIF orientation and bound pixel size off the UI thread.
+    public func importPhoto(_ source: URL) throws -> String {
+        let scoped = source.startAccessingSecurityScopedResource()
+        defer { if scoped { source.stopAccessingSecurityScopedResource() } }
+        guard let imageSource = CGImageSourceCreateWithURL(source as CFURL, nil),
+              let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, [
+                kCGImageSourceCreateThumbnailFromImageAlways: true,
+                kCGImageSourceCreateThumbnailWithTransform: true,
+                kCGImageSourceThumbnailMaxPixelSize: 2560
+              ] as CFDictionary) else { throw TimelineFailure.invalidClip }
+        let name = UUID().uuidString + ".jpg"
+        let target = directory.appendingPathComponent(name)
+        guard let output = CGImageDestinationCreateWithURL(target as CFURL, UTType.jpeg.identifier as CFString, 1, nil) else { throw TimelineFailure.invalidClip }
+        CGImageDestinationAddImage(output, image, [kCGImageDestinationLossyCompressionQuality: 0.9] as CFDictionary)
+        guard CGImageDestinationFinalize(output) else {
+            try? FileManager.default.removeItem(at: target)
+            throw TimelineFailure.invalidClip
+        }
+        return name
     }
     public func importFile(_ source: URL, kind: MediaKind) throws -> String {
         let scoped = source.startAccessingSecurityScopedResource()
