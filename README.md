@@ -9,7 +9,7 @@ queue, generation, timeline and export are not implemented. Matrix entries descr
 verified documentation, not tested credentials or live availability. No API keys are bundled.
 No analytics. Paid calls and account farming are prohibited.
 
-**No compiler ran locally. No IPA has been built. No simulator screenshot has been reviewed.**
+**No compiler runs locally. Milestones M0-M2 have successful macOS CI package tests and unsigned device builds. No simulator or physical-device visual/audio check has happened. An unsigned CI IPA is not a signed install or a finished app.**
 
 ## Open on a Mac
 
@@ -38,9 +38,30 @@ no signing identity or provisioning profile.
 ## Modules
 
 - StudioCore: schema-versioned models, pipeline stages.
-- ProviderKit: registry and capability interfaces (next milestone).
-- StudioPersistence: persistent jobs and project stores (planned).
-- StudioMedia: AVFoundation timeline and export (planned).
-- StudioFeatures: accessible SwiftUI shell and later feature screens.
+- ProviderKit: registry, fallback actor and Cloudflare script/image adapters.
+- StudioPersistence: SwiftData project store and idempotent persistent DAG jobs.
+- StudioMedia: project sidecars, installed-voice audio files and editable SRT. Timeline/export comes later.
+- StudioFeatures: SwiftUI tabs, saved projects, reviewed generation workspace and Model Manager.
 
 See PROVIDER_MATRIX.md, ASSUMPTIONS.md, and docs/ADDING_A_PROVIDER.md.
+
+## M1 provider infrastructure
+
+Capability protocols, manifest constraints, normalized file-backed results, a sync failover actor,
+shared quota buckets, Retry-After parsing, bounded transient retries and offline mock tests are
+implemented. Model Manager groups documented candidates, saves toggles/order, configures keys
+in Keychain and runs the exact three-model mock demo. Real adapters and connection/usage tests
+are deliberately pending. No real candidate is labelled Available. Async provider jobs require
+the next milestone's persistent queue; this engine will not silently resubmit them.
+
+
+## M3 reviewed workspace
+
+1. Create a named project with an idea, then open it in Projects. You can write and edit the script without a provider account.
+2. Optional cloud generation: in Settings enter your Cloudflare account ID and confirm it is Workers Free, not Workers Paid. Check that plan in the official dashboard yourself. In Models configure the Cloudflare token for each model you intend to use and enable that model. Keys stay in device Keychain. Cloudflare's 10,000-neuron/day allocation is shared; no metered upgrade is allowed. No remaining-quota API is assumed.
+3. Script/image generation sends the labelled prompt to Cloudflare when you press its button. Outputs need review. FLUX uses documented default dimensions; no selectable generator ratio is promised. Other provider candidates have no executable adapter yet. No live cloud call is made in CI.
+4. Choose an exact installed voice locale and voice to save local CAF voiceover audio. Listen and review it. If Punjabi is unavailable on that device, the app does not substitute English or another language. Device audio testing is still pending.
+5. Estimate subtitles using the script and audio duration, then edit the SRT timings. This is a manual timing aid, not transcription or word alignment. Validate/save/share the SRT. Styled burned-in captions arrive with video editing.
+6. Current scripts, media prompts, selected voices, subtitle text and media provenance live in atomic version-1 sidecars under Application Support/AIStudio/Projects/<project UUID>. Media files stay on disk. Generated script versions also append to the DB. Relaunch opens projects, but pending async-provider jobs are not yet actively polled.
+
+M3 does not implement queue-driven Auto-create, streamed generation, imported-media transcription, ElevenLabs, Mistral, video composition or export. Cloudflare contract tests are synthetic sanitized docs-based fixtures, not recordings of live success. Availability is not inferred from key presence or a green compile. Device/simulator visual validation and sideload signing remain unverified.
