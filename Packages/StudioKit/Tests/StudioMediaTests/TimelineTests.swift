@@ -31,6 +31,27 @@ final class TimelineTests: XCTestCase {
         let first = TimelineFiles(directory: directory); try await first.save(document)
         let loaded = try await TimelineFiles(directory: directory).load(); XCTAssertEqual(loaded, document)
     }
+    func testPhotoImportNormalizesToJPEGAndRejectsInvalidData() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let context = CGContext(data: nil, width: 80, height: 120, bitsPerComponent: 8, bytesPerRow: 320, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
+        context.setFillColor(CGColor(red: 0, green: 1, blue: 0, alpha: 1)); context.fill(CGRect(x: 0, y: 0, width: 80, height: 120))
+        let source = directory.appendingPathComponent("source.png")
+        let output = CGImageDestinationCreateWithURL(source as CFURL, UTType.png.identifier as CFString, 1, nil)!
+        CGImageDestinationAddImage(output, context.makeImage()!, nil); XCTAssertTrue(CGImageDestinationFinalize(output))
+        let files = TimelineFiles(directory: directory)
+        let name = try await files.importPhoto(source)
+        XCTAssertTrue(name.hasSuffix(".jpg"))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: source.path))
+        let imported = CGImageSourceCreateWithURL(directory.appendingPathComponent(name) as CFURL, nil)!
+        XCTAssertEqual(CGImageSourceGetType(imported) as String?, UTType.jpeg.identifier)
+        XCTAssertEqual(CGImageSourceCreateImageAtIndex(imported, 0, nil)?.height, 120)
+        let bad = directory.appendingPathComponent("bad.png")
+        try Data("not an image".utf8).write(to: bad)
+        do { _ = try await files.importPhoto(bad); XCTFail("Invalid photo must be rejected") }
+        catch { XCTAssertTrue(error is TimelineFailure) }
+    }
     func testRealStillExportHasCorrectSizeDurationAndCodec() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
