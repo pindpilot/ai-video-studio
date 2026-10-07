@@ -13,9 +13,9 @@ public actor StudioStore {
 
     public static func makeContainer(inMemory: Bool = false, storeURL: URL? = nil) throws -> ModelContainer {
         let schema = Schema([ProjectRecord.self, StageJob.self])
-        let configuration: ModelConfiguration
-        if let storeURL { configuration = ModelConfiguration(url: storeURL) }
-        else { configuration = ModelConfiguration(isStoredInMemoryOnly: inMemory) }
+        let configuration: SwiftData.ModelConfiguration
+        if let storeURL { configuration = SwiftData.ModelConfiguration(url: storeURL) }
+        else { configuration = SwiftData.ModelConfiguration(isStoredInMemoryOnly: inMemory) }
         return try ModelContainer(for: schema, configurations: [configuration])
     }
 
