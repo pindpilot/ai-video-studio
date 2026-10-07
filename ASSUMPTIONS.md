@@ -39,3 +39,10 @@ Date: 2026-10-07. Scope is the native Swift 6 / SwiftUI brief, not the earlier P
 - Version-1 sidecar documents hold current script, prompts, language/voice and media provenance. Script generation also appends a DB script version. Media remains in the project's Application Support directory. Existing unreadable sidecars are never overwritten by a fresh blank document.
 - Subtitle timing estimates require listening and review; no audio transcription is claimed. SRT text can be replaced with manually authored timing. No default-language substitution for Punjabi voiceover.
 - A compiled artifact is not a device audio or UI test. Live calls require the user's real free account/key and approved project prompt; no signups, card entry, hidden quota use or fake credentials are needed for CI.
+
+## M4
+- Video means imported clips and locally rendered still-image slideshow, not cloud AI text-to-video. Default fit preserves all content with black bars, no silent crop. Reframe pan/zoom UI and crossfades remain pending.
+- Timeline supports sequential trim ranges, midpoint split, reorder/delete, speed 0.25-4x, clip/voiceover volume and 30-entry undo/redo in this screen session. Edits autosave version-1 timeline sidecar; undo history is session-only.
+- Limits: 100 clips, 10-minute total, at most 10-minute source duration per clip. Full source files are copied locally; no proxy editor/stream download claim yet.
+- Export is local MP4, 30fps, selectable 9:16/16:9/1:1 720p/1080p. H.264 verified in real fixture test, not inferred only from a filename. Photos saving, burned captions, transitions and ducking remain pending.
+- Background/lock cancels export. Partial files are deleted. App asks the user to remain in foreground and review the whole finished video/audio before sharing. No automatic sharing or publishing.
