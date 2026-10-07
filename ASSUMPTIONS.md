@@ -31,3 +31,11 @@ Date: 2026-10-07. Scope is the native Swift 6 / SwiftUI brief, not the earlier P
 - A job left "running" at relaunch is requeued because stage operations must be idempotent. A job waiting on a provider keeps its provider job ID and is only ever re-polled, never resubmitted.
 - invalidRequest and policyRefused end in needsAttention for the user; they are never retried or rerouted. Other failures are retryable up to 3 times, per scene, without touching succeeded siblings.
 - Background execution is still unclaimed: BGContinuedProcessingTask and background URLSession are considered at the export/download milestone, with iOS limits stated in the UI.
+
+## M3
+- First executable paths: manual scripts, Cloudflare Llama script and FLUX image adapters, installed Apple local voice to CAF, editable SRT with explicitly estimated timing. ElevenLabs, Mistral, STT, streaming, timed captions and translation remain pending, not silently mocked.
+- A cloud prompt sends data only after the user presses its labelled generation button. Tokens are model-specific Keychain entries, Cloudflare account ID is nonsecret in Settings. Confirm Workers Free before any request; metered accounts are ineligible. App does not claim to inspect the billing plan through an undocumented endpoint.
+- Projects tab now opens the on-disk SwiftData store and calls relaunch reconciliation. Provider-waiting jobs remain waiting with an honest notice, not a fake successful re-poll. M3 interactive steps save atomic output sidecars; queue-driven Auto-create wiring remains pending.
+- Version-1 sidecar documents hold current script, prompts, language/voice and media provenance. Script generation also appends a DB script version. Media remains in the project's Application Support directory. Existing unreadable sidecars are never overwritten by a fresh blank document.
+- Subtitle timing estimates require listening and review; no audio transcription is claimed. SRT text can be replaced with manually authored timing. No default-language substitution for Punjabi voiceover.
+- A compiled artifact is not a device audio or UI test. Live calls require the user's real free account/key and approved project prompt; no signups, card entry, hidden quota use or fake credentials are needed for CI.
