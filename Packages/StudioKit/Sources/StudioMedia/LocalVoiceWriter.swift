@@ -36,6 +36,8 @@ public final class LocalVoiceWriter: NSObject, AVSpeechSynthesizerDelegate {
     private var continuation: CheckedContinuation<Double, Error>?
     private var sink: AudioBufferSink?
     private var currentURL: URL?
+    private var currentUtterance: AVSpeechUtterance?
+    private var timeout: Task<Void, Never>?
     public override init() { super.init(); synthesizer.delegate = self }
     public static func availableVoices() -> [(id: String, name: String, language: String)] {
         AVSpeechSynthesisVoice.speechVoices().map { ($0.identifier, $0.name, $0.language) }
@@ -48,10 +50,14 @@ public final class LocalVoiceWriter: NSObject, AVSpeechSynthesizerDelegate {
         }
         try Task.checkCancellation()
         let utterance = AVSpeechUtterance(string: text); utterance.voice = voice
-        let writer = AudioBufferSink(url: url); sink = writer; currentURL = url
+        let writer = AudioBufferSink(url: url); sink = writer; currentURL = url; currentUtterance = utterance
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { pending in
                 continuation = pending
+                timeout = Task { [weak self] in
+                    do { try await Task.sleep(for: .seconds(300)) } catch { return }
+                    self?.cancel()
+                }
                 synthesizer.write(utterance) { buffer in writer.append(buffer) }
             }
         } onCancel: {
@@ -64,17 +70,20 @@ public final class LocalVoiceWriter: NSObject, AVSpeechSynthesizerDelegate {
     }
     nonisolated public func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         Task { @MainActor [weak self] in
-            guard let self, let sink = self.sink else { return }
+            guard let self, self.currentUtterance === utterance, let sink = self.sink else { return }
             do { self.complete(.success(try sink.finish())) }
             catch { self.complete(.failure(error)) }
         }
     }
     nonisolated public func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Task { @MainActor [weak self] in self?.complete(.failure(CancellationError())) }
+        Task { @MainActor [weak self] in
+            guard let self, self.currentUtterance === utterance else { return }
+            self.complete(.failure(CancellationError()))
+        }
     }
     private func complete(_ result: Result<Double, Error>) {
         guard let pending = continuation else { return }
-        continuation = nil
+        continuation = nil; timeout?.cancel(); timeout = nil; currentUtterance = nil
         if case .failure = result, let url = currentURL { try? FileManager.default.removeItem(at: url) }
         sink = nil; currentURL = nil; pending.resume(with: result)
     }
