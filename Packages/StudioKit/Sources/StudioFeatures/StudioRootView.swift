@@ -28,6 +28,10 @@ public struct StudioRootView: View {
     @State private var store = ProjectListStore()
     public init() {}
     public var body: some View {
+        Group {
+        if ProcessInfo.processInfo.arguments.contains("-m4-timeline-smoke") {
+            NavigationStack { TimelineView(projectID: UUID(uuidString: "00000000-0000-0000-0000-000000000004")!) }
+        } else {
         TabView {
             CreateView(store: store).tabItem { Label("Create", systemImage: "sparkles") }
             ProjectsView(store: store).tabItem { Label("Projects", systemImage: "folder") }
@@ -37,6 +41,8 @@ public struct StudioRootView: View {
             ModelManagerView().tabItem { Label("Models", systemImage: "square.stack.3d.up") }
             SettingsView().tabItem { Label("Settings", systemImage: "gearshape") }
         }.task { await store.open() }
+        }
+        }
     }
 }
 private struct CreateView: View {
