@@ -16,5 +16,5 @@ public struct StudioProject: Identifiable, Codable, Equatable, Sendable {
     }
 }
 public enum StudioBuildStatus {
-    public static let milestone = "M3: manual scripts, Cloudflare script/image adapters, local voiceover audio and editable SRT. Device tests pending; video export arrives later."
+    public static let milestone = "M3: manual scripts, Cloudflare script/image adapters, local voiceover audio and editable SRT. Device audio tests pending; video export arrives later."
 }
