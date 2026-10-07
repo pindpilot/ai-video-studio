@@ -4,7 +4,7 @@ public enum PipelineStage: String, Codable, CaseIterable, Sendable {
     public var title: String { rawValue.capitalized }
 }
 public struct StudioProject: Identifiable, Codable, Equatable, Sendable {
-    public static let currentSchemaVersion = 1
+    public static let currentSchemaVersion = 2
     public var id: UUID
     public var schemaVersion: Int
     public var name: String
@@ -16,5 +16,5 @@ public struct StudioProject: Identifiable, Codable, Equatable, Sendable {
     }
 }
 public enum StudioBuildStatus {
-    public static let milestone = "M1: provider infrastructure and mock failover. Live generation not connected yet."
+    public static let milestone = "M2: persistent project store and idempotent stage-job queue. Live generation not connected yet."
 }
