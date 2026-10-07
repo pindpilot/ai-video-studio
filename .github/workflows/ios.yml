@@ -74,7 +74,7 @@ jobs:
           xcrun simctl launch "$DEVICE" app.pindpilot.aivideostudio
           sleep 10
           mkdir -p docs/screenshots
-          xcrun simctl io "$DEVICE" screenshot docs/screenshots/M3-create.png
+          xcrun simctl io "$DEVICE" screenshot docs/screenshots/M4.1-chat-home.png
           xcrun simctl terminate "$DEVICE" app.pindpilot.aivideostudio
           xcrun simctl launch "$DEVICE" app.pindpilot.aivideostudio -m4-timeline-smoke
           sleep 5
