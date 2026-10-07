@@ -1,16 +1,16 @@
 import Foundation
 public enum ProviderCatalog {
-    // These are documented candidates, not executable adapters. Registration happens separately.
+    // Cloudflare text/image have adapters; other entries remain documented candidates.
     public static let candidates: [ModelManifest] = [
         .init(id: "cf-text", provider: "Cloudflare", model: "Llama 3.2 3B", capability: .text,
               source: source("https://developers.cloudflare.com/workers-ai/models/llama-3.2-3b-instruct/"),
               keyPage: URL(string: "https://dash.cloudflare.com/profile/api-tokens"),
-              terms: "10,000 neurons/day shared across all Workers AI models. No paid upgrade.",
+              terms: "10,000 neurons/day shared across all Workers AI models. Workers Free only; metered accounts ineligible.",
               dataDisclosure: "Prompt and script sent to Cloudflare when an adapter is enabled.", quotaBucket: "cloudflare"),
         .init(id: "cf-image", provider: "Cloudflare", model: "FLUX.1 schnell", capability: .image,
               source: source("https://developers.cloudflare.com/workers-ai/models/flux-1-schnell/"),
               keyPage: URL(string: "https://dash.cloudflare.com/profile/api-tokens"),
-              terms: "Shared 10,000 neurons/day. Selectable ratio/resolution still unverified.",
+              terms: "Shared 10,000 neurons/day. Workers Free only. Provider default dimensions; no custom ratio.",
               dataDisclosure: "Image prompts sent to Cloudflare when an adapter is enabled.", quotaBucket: "cloudflare"),
         .init(id: "eleven-speech", provider: "ElevenLabs", model: "Voice/model selection pending", capability: .speech,
               source: source("https://elevenlabs.io/docs/api-reference/text-to-speech/convert"),
@@ -19,7 +19,7 @@ public enum ProviderCatalog {
               dataDisclosure: "Voiceover text sent to ElevenLabs when an adapter is enabled.", quotaBucket: "elevenlabs"),
         .init(id: "apple-speech", provider: "Apple on-device", model: "AVSpeechSynthesizer", capability: .speech,
               source: source("https://developer.apple.com/documentation/avfaudio/avspeechsynthesizer"), needsKey: false,
-              terms: "No cloud quota. Installed voice and language availability vary. Audio export adapter pending.",
+              terms: "No cloud quota. Installed voices only. Local CAF audio export; device test pending.",
               dataDisclosure: "Voiceover text stays on the device."),
         .init(id: "mistral-text", provider: "Mistral", model: "Selection and privacy check pending", capability: .text,
               source: source("https://docs.mistral.ai/getting-started/quickstarts/studio/activate-and-generate-api-key", eligibility: .unverified),
