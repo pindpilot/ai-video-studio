@@ -145,6 +145,7 @@ struct WorkspaceView: View {
             }
             Section("On-device voiceover") {
                 TextField("Voice locale (for example en-US)", text: $store.document.language)
+                    .disabled(store.busy)
                 Picker("Installed voice", selection: $store.document.voiceID) {
                     Text("Choose a voice").tag("")
                     ForEach(LocalVoiceWriter.availableVoices().filter { $0.language == store.document.language }, id: \.id) { voice in
@@ -177,6 +178,8 @@ struct WorkspaceView: View {
         .task { await store.load() }
         .onChange(of: store.document.script) { _, _ in Task { await store.save() } }
         .onChange(of: store.document.imagePrompt) { _, _ in Task { await store.save() } }
+        .onChange(of: store.document.voiceID) { _, _ in Task { await store.save() } }
+        .onChange(of: store.document.language) { _, _ in store.document.voiceID = ""; Task { await store.save() } }
         .onChange(of: store.document.subtitleSource) { _, _ in Task { await store.save() } }
         .onDisappear { store.cancel(); Task { await store.save() } }
     }
