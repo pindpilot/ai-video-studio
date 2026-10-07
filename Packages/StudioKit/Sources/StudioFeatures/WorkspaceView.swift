@@ -132,6 +132,7 @@ struct WorkspaceView: View {
     init(project: ProjectSnapshot, database: StudioStore) { _store = State(initialValue: WorkspaceStore(project: project, database: database)) }
     var body: some View {
         Form {
+            Section("Make a video") { NavigationLink("Open Timeline & Export") { TimelineView(projectID: store.project.id) } }
             scriptSection
             imageSection
             voiceSection
