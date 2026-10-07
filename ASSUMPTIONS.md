@@ -23,3 +23,11 @@ Date: 2026-10-07. Scope is the native Swift 6 / SwiftUI brief, not the earlier P
 - Quota reset dates are never invented. Unknown quota reset blocks the shared quota bucket until explicit recheck. Rate limits without Retry-After use a conservative 60-second cooldown, not an assertion about provider reset.
 - Key presence is configuration, not authentication. All real candidates stay Untested/Needs key. Offline mock success never changes their availability.
 - M0 bootstrap source-commit condition was wrong: it was re-evaluated after extraction. M1 marks bootstrap with a step output so the restored tree is committed once, with [skip ci].
+
+## M2
+- Persistence uses SwiftData (a brief-listed option). A single-writer actor owns the store; UI never touches ModelContext directly. In-memory containers are for tests; the app uses the default on-disk container.
+- Schema version is a lightweight recorded marker (v2). A formal VersionedSchema migration plan lands when v3 actually changes fields; inventing migration steps now would be theatre.
+- Queue execution drains sequentially: an honest concurrency cap of one until real async adapters exist. Parallelism and thermal-aware throttling arrive with real workloads, not as untested scaffolding.
+- A job left "running" at relaunch is requeued because stage operations must be idempotent. A job waiting on a provider keeps its provider job ID and is only ever re-polled, never resubmitted.
+- invalidRequest and policyRefused end in needsAttention for the user; they are never retried or rerouted. Other failures are retryable up to 3 times, per scene, without touching succeeded siblings.
+- Background execution is still unclaimed: BGContinuedProcessingTask and background URLSession are considered at the export/download milestone, with iOS limits stated in the UI.
