@@ -11,6 +11,8 @@ final class SubtitleTests: XCTestCase {
         XCTAssertThrowsError(try SubtitleTrack.parseSRT("1\n00:00:05,000 --> 00:00:01,000\nNo"))
         XCTAssertThrowsError(try SubtitleTrack.parseSRT("bad"))
         XCTAssertThrowsError(try SubtitleTrack.estimate(script: " ", duration: 10))
+        XCTAssertThrowsError(try SubtitleTrack.estimate(script: "Hi", duration: 1e100))
+        XCTAssertThrowsError(try SubtitleTrack.parseSRT("1\n99999999999999999999:00:00,000 --> 99999999999999999999:00:01,000\nHi"))
     }
     func testDiskWorkspaceRoundTripAndTraversalRejected() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
