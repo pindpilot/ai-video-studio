@@ -46,3 +46,11 @@ Date: 2026-10-07. Scope is the native Swift 6 / SwiftUI brief, not the earlier P
 - Limits: 100 clips, 10-minute total, at most 10-minute source duration per clip. Full source files are copied locally; no proxy editor/stream download claim yet.
 - Export is local MP4, 30fps, selectable 9:16/16:9/1:1 720p/1080p. H.264 verified in real fixture test, not inferred only from a filename. Photos saving, burned captions, transitions and ducking remain pending.
 - Background/lock cancels export. Partial files are deleted. App asks the user to remain in foreground and review the whole finished video/audio before sharing. No automatic sharing or publishing.
+
+## M4.1 device-usability hotfix
+- User reported inability to add photos on his iPhone. Code inspection found the app only used fileImporter (Files), not Photos. This is a verified missing path, not a reproduced physical-device crash.
+- Native PhotosPicker uses the out-of-process system picker and does not request broad photo-library permission. No NSPhotoLibraryUsageDescription is needed for this selected-item-only path. Reference: https://developer.apple.com/documentation/photokit/selecting-photos-and-videos-in-ios
+- Copy picked temporary files before their transfer lifetime ends; normalize HEIC/JPEG/PNG with EXIF transform to bounded JPEGs on the TimelineFiles actor. Failed/iCloud selections give a retry notice. No cloud upload is involved.
+- Chat-shaped home is a simple local slideshow assistant, not an unconfigured chatbot or a hidden AI call. Add photos, duration, shape, export, preview and share are visible on one screen. Prompts are explicitly reference-only; advanced M3 cloud tools remain in More options.
+- Existing projects are retained. New home reopens its last project ID and uses the same timeline storage/export engine. Physical-device photo selection still requires the owner's ESign-installed test.
+- M5 music/enhancement/background-removal/scene-detection/gallery are paused until this hotfix ships.
