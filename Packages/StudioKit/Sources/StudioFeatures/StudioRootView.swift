@@ -32,6 +32,9 @@ public struct StudioRootView: View {
         if ProcessInfo.processInfo.arguments.contains("-m4-timeline-smoke") {
             NavigationStack { TimelineView(projectID: UUID(uuidString: "00000000-0000-0000-0000-000000000004")!) }
         } else {
+        #if os(iOS)
+        ChatStudioView(projects: store)
+        #else
         TabView {
             CreateView(store: store).tabItem { Label("Create", systemImage: "sparkles") }
             ProjectsView(store: store).tabItem { Label("Projects", systemImage: "folder") }
@@ -41,6 +44,7 @@ public struct StudioRootView: View {
             ModelManagerView().tabItem { Label("Models", systemImage: "square.stack.3d.up") }
             SettingsView().tabItem { Label("Settings", systemImage: "gearshape") }
         }.task { await store.open() }
+        #endif
         }
         }
     }
@@ -85,7 +89,7 @@ private struct ProjectsView: View {
         }
     }
 }
-private struct SettingsView: View {
+struct SettingsView: View {
     @AppStorage("cloudflare-account") private var account = ""
     @AppStorage("cloudflare-free-confirmed") private var freeConfirmed = false
     var body: some View {
