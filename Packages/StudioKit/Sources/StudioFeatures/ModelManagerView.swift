@@ -25,7 +25,7 @@ final class ModelManagerStore {
     }
     func availability(_ model: ModelManifest) -> String {
         if model.needsKey && configured[model.id] != true { return "Needs key" }
-        return "Untested - adapter pending"
+        return "Untested - run a reviewed project step"
     }
     func move(_ offsets: IndexSet, to target: Int, capability: Capability) {
         var group = models.filter { $0.capability == capability }; group.move(fromOffsets: offsets, toOffset: target)
@@ -61,7 +61,7 @@ public struct ModelManagerView: View {
             List {
                 Section {
                     Text("Personal use · Free only").font(.headline)
-                    Text("Documentation verified is not live availability. No provider calls in M1; connection tests arrive with each adapter. Enabling a candidate does not make it runnable.").font(.footnote)
+                    Text("Documentation verified is not live availability. Cloudflare script/image and local audio are connected to project steps. Other candidates remain pending. Every real result needs review.").font(.footnote)
                 }
                 ForEach(Capability.allCases, id: \.self) { capability in
                     let group = store.models.filter { $0.capability == capability }
@@ -101,7 +101,7 @@ public struct ModelManagerView: View {
     }
     private func position(_ model: ModelManifest, in group: [ModelManifest]) -> String {
         let active = group.filter { store.enabled[$0.id] == true && store.configured[$0.id] == true && $0.source.eligibility == .verifiedOperation }
-        if let index = active.firstIndex(where: { $0.id == model.id }) { return "Candidate priority #\(index + 1) of \(active.count). Adapter pending." }
+        if let index = active.firstIndex(where: { $0.id == model.id }) { return "Candidate priority #\(index + 1) of \(active.count). Only implemented adapters can run." }
         return "Not in enabled, configured candidate chain."
     }
 }
