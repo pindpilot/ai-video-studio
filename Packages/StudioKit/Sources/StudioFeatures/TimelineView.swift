@@ -172,7 +172,7 @@ struct TimelineView: View {
             Slider(value: numberBinding(clip.id, \.speed), in: 0.25...4) { Text("Speed") }
             Text("Speed \(clip.speed, specifier: "%.2f")× · output \(clip.outputDuration, specifier: "%.1f")s").font(.caption)
             if clip.kind == .video {
-                Slider(value: Binding(get: { clip.volume }, set: { value in store.edit { doc in if let index = doc.clips.firstIndex(where: { $0.id == clip.id }) { doc.clips[index].volume = value } } }), in: 0...1) { Text("Clip volume") }
+                Slider(value: Binding(get: { store.document.clips.first(where: { $0.id == clip.id })?.volume ?? 1 }, set: { value in store.edit { doc in if let index = doc.clips.firstIndex(where: { $0.id == clip.id }) { doc.clips[index].volume = value } } }), in: 0...1) { Text("Clip volume") }
             }
             Button("Split at midpoint") { store.split(clip.id) }.disabled(clip.duration < 0.2)
         }.disabled(store.busy)
