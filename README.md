@@ -65,3 +65,12 @@ the next milestone's persistent queue; this engine will not silently resubmit th
 6. Current scripts, media prompts, selected voices, subtitle text and media provenance live in atomic version-1 sidecars under Application Support/AIStudio/Projects/<project UUID>. Media files stay on disk. Generated script versions also append to the DB. Relaunch opens projects, but pending async-provider jobs are not yet actively polled.
 
 M3 does not implement queue-driven Auto-create, streamed generation, imported-media transcription, ElevenLabs, Mistral, video composition or export. Cloudflare contract tests are synthetic sanitized docs-based fixtures, not recordings of live success. Availability is not inferred from key presence or a green compile. Device/simulator visual validation and sideload signing remain unverified.
+
+
+## M4 local timeline and export
+
+Open a saved project, then Open Timeline & Export. Import an image or video file, or add the workspace image plus voiceover. Imported files are copied into that project; only use media you have permission to use. Timeline edits autosave a separate version-1 sidecar. Trim start/duration, midpoint split, reorder/delete, speed and audio volumes are available. Undo/redo lasts for this screen session (30 edits), not across relaunch.
+
+Choose 9:16, 16:9 or 1:1 at 720p/1080p, then Export local MP4. Output is 30fps H.264; content is fitted with black bars rather than silently cropped. Export is foreground-only and cancels if the app becomes inactive. Review the full MP4/audio before using Share. No file is automatically published or sent. Clip speed also changes its audio speed; independent pitch correction is not claimed.
+
+Current limits: 100 clips / 10-minute total, no AI-generated video API, crossfades, burned captions, crop/pan UI, automatic audio ducking, proxy editor or direct Photos save yet. A real local fixture test checks codec, dimensions and duration and saves a decoded output frame for visual inspection. Simulator smoke covers the blank timeline screen, not every editing interaction or imported codec. Physical-device playback, memory/thermal behavior and signing remain unverified.
